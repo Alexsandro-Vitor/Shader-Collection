@@ -4,7 +4,8 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "black" {}
-        _EmissionColor ("Rim Color", Color) = (1,1,1,1)
+        _RimColor ("Rim Color", Color) = (1,1,1,1)
+        _RimPower ("Rim Fill", Range(0, 2)) = 1
     }
     SubShader
     {
@@ -24,19 +25,20 @@
             float3 viewDir;
         };
 
-        fixed4 _Color;
-        fixed4 _EmissionColor;
+        half4 _Color;
+        half4 _RimColor;
+        half _RimPower;
 
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            half4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
             o.Alpha = c.a;
-            half d = 1 - dot(o.Normal, IN.viewDir);
-            o.Emission += _EmissionColor * d;
+            half d = 1 - pow(dot(o.Normal, IN.viewDir), _RimPower);
+            o.Emission += _RimColor * d;
         }
         ENDCG
     }
